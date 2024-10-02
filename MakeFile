@@ -1,0 +1,22 @@
+CC = gcc
+LD = ld
+ASM = nasm
+CFLAGS = -ffreestanding -m32
+LDFLAGS = -m elf_i386 -Ttext 0x7E00 --oformat binary
+
+all: os_image.bin
+
+boot.bin: boot.asm
+	$(ASM) -f bin boot.asm -o boot.bin
+
+kernel.o: kernel.c vfs.h
+	$(CC) $(CFLAGS) -c kernel.c -o kernel.o
+
+kernel.bin: kernel.o
+	$(LD) $(LDFLAGS) kernel.o -o kernel.bin
+
+os_image.bin: boot.bin kernel.bin
+	cat boot.bin kernel.bin > os_image.bin
+
+clean:
+	rm -f *.bin *.o
